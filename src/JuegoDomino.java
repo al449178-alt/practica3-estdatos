@@ -118,16 +118,21 @@ public class JuegoDomino {
     }
 
     public boolean intentarColocar(Ficha f) {
-        if((cadena.getFirst().getLadoA()== f.getLadoB() || cadena.getFirst().getLadoA()==f.getLadoA()) && (cadena.getFirst().getLadoB()== f.getLadoB() || cadena.getFirst().getLadoB()==f.getLadoA())){
-            if (cadena.getFirst().getLadoA() < cadena.getFirst().getLadoB()){
+        if((cadena.getFirst().getLadoA()== f.getLadoB() || cadena.getFirst().getLadoA()==f.getLadoA()) && (cadena.getLast().getLadoB()== f.getLadoB() || cadena.getLast().getLadoB()==f.getLadoA())){
+            if (cadena.getFirst().getLadoA() < cadena.getLast().getLadoB()){
                 if (f.getLadoB()==cadena.getFirst().getLadoA()){
                     colocarEnIzquierda(f, cadena.getFirst().getLadoA());
                     return true;
                 }
-                colocarEnDerecha(f, cadena.getFirst().getLadoB());
+                colocarEnIzquierda(f.invertir(), cadena.getFirst().getLadoA());
                 return true;
             }
-
+            if (f.getLadoB()==cadena.getLast().getLadoB()){
+                colocarEnIzquierda(f.invertir(), cadena.getLast().getLadoB());
+                return true;
+            }
+            colocarEnDerecha(f, cadena.getLast().getLadoB());
+            return true;
         }
         return false;
     }
