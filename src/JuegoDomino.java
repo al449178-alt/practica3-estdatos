@@ -13,7 +13,7 @@ public class JuegoDomino {
     private int turno;
 
     public JuegoDomino (String nombresJugadores[], int nFichas) {
-       if(nombresJugadores.length<2 || nombresJugadores.length>4 || nombresJugadores==null) {
+       if(nombresJugadores==null||nombresJugadores.length<2 || nombresJugadores.length>4) {
            throw new IllegalArgumentException();
        }
        this.NFICHAS=nFichas;
@@ -114,24 +114,44 @@ public class JuegoDomino {
 
    
     public boolean jugarTurno(Jugador jugador) {
-       return false;
+        int izq= cadena.getFirst().getLadoA();
+        int der=cadena.getLast().getLadoB();
+        Ficha elegida= jugador.buscarFicha(izq,der);
+        if(elegida!=null){
+            intentarColocar(elegida);
+            return true;
+        }
+        while(!pozo.empty()){
+            Ficha nueva = pozo.pop();
+            if(intentarColocar(nueva)){
+                return true;
+            }
+            jugador.recibirFicha(nueva);
+        }
+        return false;
     }
 
     public boolean intentarColocar(Ficha f) {
-        if((cadena.getFirst().getLadoA()== f.getLadoB() || cadena.getFirst().getLadoA()==f.getLadoA()) && (cadena.getLast().getLadoB()== f.getLadoB() || cadena.getLast().getLadoB()==f.getLadoA())){
-            if (cadena.getFirst().getLadoA() < cadena.getLast().getLadoB()){
-                if (f.getLadoB()==cadena.getFirst().getLadoA()){
-                    colocarEnIzquierda(f, cadena.getFirst().getLadoA());
-                    return true;
-                }
-                colocarEnIzquierda(f.invertir(), cadena.getFirst().getLadoA());
-                return true;
+//
+        int nizq = cadena.getFirst().getLadoA();
+        int nder = cadena.getLast().getLadoB();
+        boolean izq = (f.getLadoA() == nizq || f.getLadoB() == nizq);
+        boolean der = (f.getLadoA() == nder || f.getLadoB() == nder);
+
+        if (izq && der) {
+            if (nizq <= nder) {
+                colocarEnIzquierda(f, nizq);
+            } else {
+                colocarEnDerecha(f, nder);
             }
-            if (f.getLadoB()==cadena.getLast().getLadoB()){
-                colocarEnIzquierda(f.invertir(), cadena.getLast().getLadoB());
-                return true;
-            }
-            colocarEnDerecha(f, cadena.getLast().getLadoB());
+            return true;
+        }
+        if (izq) {
+            colocarEnIzquierda(f, nizq);
+            return true;
+        }
+        if (der) {
+            colocarEnDerecha(f, nder);
             return true;
         }
         return false;
@@ -162,7 +182,37 @@ public class JuegoDomino {
     }
 
     public Jugador determinarGanador() {
-       
+        int minPuntos = jugadores[0].calcularPuntosRestantes();
+
+        for (Jugador j : jugadores) {
+            int puntos = j.calcularPuntosRestantes();
+            System.out.println(j.getNombre() + " termina con " + puntos + " pts");
+            if (puntos < minPuntos) {
+                minPuntos = puntos;
+            }
+        }
+        int minFichas = -1;
+        for (Jugador j : jugadores) {
+            if (j.calcularPuntosRestantes() == minPuntos) {
+                int nFichas = j.getFichas().size();
+                if (minFichas == -1 || nFichas < minFichas) {
+                    minFichas = nFichas;
+                }
+            }
+        }
+        Jugador ganador = null;
+        int candidatos = 0;
+
+        for (Jugador j : jugadores) {
+            if (j.calcularPuntosRestantes() == minPuntos && j.getFichas().size() == minFichas) {
+                ganador = j;
+                candidatos++;
+            }
+        }
+        if (candidatos == 1) {
+            System.out.println("El ganador es: " + ganador.getNombre());
+            return ganador;
+        }
         return null;
     }
 
@@ -174,5 +224,8 @@ public class JuegoDomino {
     }
     public Object[] getCadena() {
         return this.cadena.toArray();
+    }
+    public Stack<Ficha> getPozo(){
+        return this.pozo;
     }
 }
